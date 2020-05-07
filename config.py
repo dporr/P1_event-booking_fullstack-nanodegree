@@ -12,3 +12,4 @@ password = os.getenv("POSTGRES_PASSWORD")
 host = os.getenv("POSTGRES_HOST")
 schema = os.getenv("APP_SCHEMA")
 SQLALCHEMY_DATABASE_URI =  f'postgresql://{user}:{password}@{host}:5432/{schema}'
+SQLALCHEMY_TRACK_MODIFICATIONS= False
