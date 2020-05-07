@@ -43,8 +43,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(600))
     genres = db.Column(db.ARRAY(db.String()))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    #TODO: Add reference to shows
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -61,7 +60,8 @@ class Artist(db.Model):
     website = db.Column(db.String(120))
     #TODO: Add reference to shows
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# TODO Implement Show model, and complete all model relationships and properties,
+# as a database migration.
 
 #----------------------------------------------------------------------------#
 # Filters.
