@@ -43,7 +43,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(600))
     genres = db.Column(db.ARRAY(db.String()))
-    #TODO: Add reference to shows
+    shows = db.relationship('Show', backref='Venue', lazy=True,)
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -58,10 +58,14 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(600))
     website = db.Column(db.String(120))
-    #TODO: Add reference to shows
+    shows = db.relationship('Show', backref='Artist', lazy=True,)
 
-# TODO Implement Show model, and complete all model relationships and properties,
-# as a database migration.
+class Show(db.Model):
+    __tablename__ = 'Show'
+    id = db.Column(db.Integer, primary_key=True)
+    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
 
 #----------------------------------------------------------------------------#
 # Filters.
