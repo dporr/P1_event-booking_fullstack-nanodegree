@@ -73,7 +73,22 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(600))
     website = db.Column(db.String(120))
-    shows = db.relationship('Show', backref='Artist', lazy=True,)
+    shows = db.relationship('Show', backref='Artist', lazy=True,)\
+    
+    def as_dict(self):
+      return {
+            'id' :self.id,
+            'name': self.name,
+            'city': self.city,
+            'state': self.state,
+            'phone': self.phone,
+            'genres': self.genres,
+            'image_link': self.image_link,
+            'facebook_link': self.facebook_link,
+            'seeking_venue': self.seeking_venue,
+            'seeking_description': self.seeking_description,
+            'website': self.website
+            }
 
 class Show(db.Model):
     __tablename__ = 'Show'
