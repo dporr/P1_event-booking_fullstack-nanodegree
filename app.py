@@ -144,7 +144,14 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-  venue={}
+  #TODO: Add past/upcoming shows details
+  past_shows = []
+  upcoming_shows = []
+  venue = Venue.query.filter_by(id=venue_id).first().as_dict()
+  venue['past_shows'] = past_shows
+  venue['upcoming_shows'] = upcoming_shows
+  venue["past_shows_count"] = 1
+  venue["upcoming_shows_count"] = 1
   return render_template('pages/show_venue.html', venue=venue)
 
 #  Create Venue
