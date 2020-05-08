@@ -249,17 +249,28 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
-  past_shows = []
-  upcoming_shows = []
-  past_shows_count = 0
-  upcoming_shows_count = 0
-  _artist = Artist.query.filter_by(id=artist_id).first()
+  artist_query = Artist.query.filter_by(id=artist_id)
+  current_time = datetime.datetime.utcnow()
+  shows = db.session.query(Show).filter_by(artist_id=artist_id).all()
+  upcoming_shows =  [{
+                  "venue_id": show.venue_id,
+                  "venue_name": show.Venue.name,
+                  "venue_image_link": show.Venue.image_link,
+                  "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
+  } for show in shows if show.start_time > current_time]
+  past_shows =  [{
+                  "venue_id": show.venue_id,
+                  "venue_name": show.Venue.name,
+                  "venue_image_link": show.Venue.image_link,  
+                  "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
+  } for show in shows if show.start_time < current_time]
+  _artist = artist_query.first()
   artist = _artist.as_dict()
   artist['genres'] =  _artist.genres.replace('{','').replace('}','').split(',')
   artist["past_shows"] = past_shows
   artist["upcoming_shows"] = upcoming_shows
-  artist["past_shows_count"] = past_shows_count
-  artist["upcoming_shows_count"] = upcoming_shows_count
+  artist["past_shows_count"] = len(past_shows)
+  artist["upcoming_shows_count"] = len(upcoming_shows)
   return render_template('pages/show_artist.html', artist=artist)
 
 #  Update
