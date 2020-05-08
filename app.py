@@ -13,6 +13,7 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
+import datetime
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -153,14 +154,26 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-  #TODO: Add past/upcoming shows details
-  past_shows = []
-  upcoming_shows = []
-  venue = Venue.query.filter_by(id=venue_id).first().as_dict()
+  venue_query = Venue.query.filter_by(id=venue_id)
+  current_time = datetime.datetime.utcnow()
+  shows = db.session.query(Show).filter_by(venue_id=venue_id).all()
+  upcoming_shows =  [{
+                  "artist_id": show.artist_id,
+                  "artist_name": show.Artist.name,
+                  "artist_image_link": show.Artist.image_link,
+                  "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
+  } for show in shows if show.start_time > current_time]
+  past_shows =  [{
+                  "artist_id": show.artist_id,
+                  "artist_name": show.Artist.name,
+                  "artist_image_link": show.Artist.image_link,
+                  "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
+  } for show in shows if show.start_time < current_time]
+  venue = venue_query.first().as_dict()
   venue['past_shows'] = past_shows
   venue['upcoming_shows'] = upcoming_shows
-  venue["past_shows_count"] = 1
-  venue["upcoming_shows_count"] = 1
+  venue["past_shows_count"] = len(past_shows)
+  venue["upcoming_shows_count"] = len(upcoming_shows)
   return render_template('pages/show_venue.html', venue=venue)
 
 #  Create Venue
