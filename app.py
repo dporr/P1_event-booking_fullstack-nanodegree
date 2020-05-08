@@ -41,7 +41,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(600))
-    genres = db.Column(db.ARRAY(db.String()))
+    genres = db.Column(db.String())
     shows = db.relationship('Show', backref='Venue', lazy=True)
   
     def as_dict(self):
@@ -67,7 +67,7 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String))
+    genres = db.Column(db.String())
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean)
@@ -251,7 +251,9 @@ def show_artist(artist_id):
   upcoming_shows = []
   past_shows_count = 0
   upcoming_shows_count = 0
-  artist = Artist.query.filter_by(id=artist_id).first().as_dict()
+  _artist = Artist.query.filter_by(id=artist_id).first()
+  artist = _artist.as_dict()
+  artist['genres'] =  _artist.genres.replace('{','').replace('}','').split(',')
   artist["past_shows"] = past_shows
   artist["upcoming_shows"] = upcoming_shows
   artist["past_shows_count"] = past_shows_count
