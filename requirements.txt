@@ -1,4 +1,6 @@
 babel
 python-dateutil==2.6.0
+flask==1.1.2
 flask-moment
 flask-wtf
+flask-cors==3.0.8
