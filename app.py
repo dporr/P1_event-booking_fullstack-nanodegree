@@ -5,7 +5,7 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import Flask, render_template,abort, request, Response, flash, redirect, url_for,jsonify
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
@@ -219,12 +219,16 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
-  # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-  # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+  try:
+    venue = Venue.query.filter(Venue.id==venue_id).first()
+    if not venue: abort(404)
+    db.session.delete(venue)
+    db.session.commit()
+  except:
+    db.session.rollback()
+  finally:
+    db.session.close()
+  return jsonify({"success":True, "venue_id": venue_id})
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -278,27 +282,46 @@ def show_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
   form = ArtistForm()
-  artist={
-    "id": 4,
-    "name": "Guns N Petals",
-    "genres": ["Rock n Roll"],
-    "city": "San Francisco",
-    "state": "CA",
-    "phone": "326-123-5000",
-    "website": "https://www.gunsnpetalsband.com",
-    "facebook_link": "https://www.facebook.com/GunsNPetals",
-    "seeking_venue": True,
-    "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
-  }
-  # TODO: populate form with fields from artist with ID <artist_id>
+  artist = Artist.query.filter(Artist.id==artist_id).first()
+  if not artist: abort(404)
+  artist = artist.as_dict()
+  form.name.data = artist["name"]
+  form.genres.data = artist["genres"]
+  form.city.data = artist["city"]
+  form.state.data = artist["state"]
+  form.phone.data = artist["phone"]
+  form.website.data = artist["website"]
+  form.facebook_link.data = artist["facebook_link"]
+  form.seeking_venue.data = artist["seeking_venue"]
+  form.seeking_description.data = artist["seeking_description"]
+  form.image_link.data = artist["image_link"]
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-  # TODO: take values from the form submitted, and update existing
-  # artist record with ID <artist_id> using the new attributes
-
+  if not ( "city" in request.form and \
+  "state" in request.form and \
+  "phone" in request.form and \
+  "genres" in request.form  and \
+  "facebook_link" in request.form
+  ): abort(422)
+  artist = Artist.query.filter(Artist.id==artist_id).first()
+  if not artist: abort(404)
+  artist.city = request.form['city']
+  artist.state = request.form['state']
+  artist.phone = request.form['phone']
+  artist.genres = request.form['genres']
+  artist.facebook_link = request.form['facebook_link']
+  try:
+    print(">>>>>>>")
+    db.session.add(artist)
+    db.session.commit()
+    print(Artist.query.filter(Artist.id==artist_id).first().as_dict())
+  except :
+    db.session.rollback()
+    abort(500)
+  finally:
+    db.session.close()
   return redirect(url_for('show_artist', artist_id=artist_id))
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
